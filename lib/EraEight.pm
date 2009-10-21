@@ -1,10 +1,12 @@
 package EraEight;
 my $requests = 0;
 our $start;
+our $VERSION = "1.00";
 use Net::Amazon;
 our $ua_us; 
 our $ua_uk; 
-use Time::HiRes qw/gettimeofday tv_interval/;
+my $hires_loaded = 0;
+eval { require Time::HiRes; Time::HiRes->import(qw/gettimeofday tv_interval/); $hires_loaded = 1 };
 use Data::Page;
 use EraEight::DBI;
 use List::Util qw/max/;
@@ -14,7 +16,6 @@ use HTTP::Engine::Middleware;
 use strict;
 use warnings;
 use Class::DBI::Loader;
-use Authen::Passphrase;
 use KinoSearch::Searcher;
 use KinoSearch::Analysis::PolyAnalyzer;
 my $analyzer = KinoSearch::Analysis::PolyAnalyzer->new( language => 'en' );
@@ -61,7 +62,7 @@ sub new { bless {}, shift } # For templates
 
 sub handle_request {
     my $req = shift;
-    $start = [gettimeofday];
+    $start = $hires_loaded ? [gettimeofday()] : 0;
     my $page;
     my $res = HTTP::Engine::Response->new;
     my (undef, $action, @args) = split /\//,  $req->path;
@@ -112,7 +113,8 @@ sub respond {
 }
 
 sub timecheck {
-    return tv_interval ( $start, [gettimeofday]);
+    return unless $hires_loaded;
+    return tv_interval ( $start, [gettimeofday()]);
 }
 
 sub its_all_gone_wrong {
