@@ -5,7 +5,7 @@ style="border:0;margin:5px"></a></td>
 <td>
 <input value="[%req.parameters.q |html%]" title="Search" class="lst" size="55" name="q"
 maxlength="2048" autocomplete="off"><br><input type="submit"
-onclick="this.checked=1" class="lsb" value="Search Redcliffe Library"
+onclick="this.checked=1" class="lsb" value="Search [%args.library_name%] Library"
 name="btnG"></form>
 </td>
 </tr>

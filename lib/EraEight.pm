@@ -1,5 +1,6 @@
 package EraEight;
 my $requests = 0;
+our %args;
 our $start;
 our $VERSION = "1.00";
 use Net::Amazon;
@@ -27,7 +28,7 @@ my $query_parser = KinoSearch::QueryParser::QueryParser->new(
 
 sub import {
     my $self = shift;
-    my %args = ( # Defaults go first
+    %args = ( # Defaults go first
         dsn => "dbi:SQLite:heritage.db",
         interface => "ServerSimple",
         template_path => ["user_templates", "templates"],
@@ -115,6 +116,7 @@ sub respond {
         @args,
         action => $action, 
         req => $req, 
+        args => \%args,
         e8 => EraEight->new(),
         }, \$out) ? $res->body($out) : $res->body($req->{template}->error);
     return $res;
