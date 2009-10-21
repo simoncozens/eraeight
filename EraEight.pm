@@ -2,11 +2,8 @@ package EraEight;
 my $requests = 0;
 our $start;
 use Net::Amazon;
-use constant TOKEN => '1F03BA1CNFPHYBG9VN02';
-use constant KEY => 'HIn2zOh4xIDgdZMXvUqc0ZzdKc3pol42gPM6zG9d';
-my $ua_us = Net::Amazon->new(token => TOKEN, secret_key => KEY); #, locale=>"uk");
-my $ua_uk = Net::Amazon->new(token => TOKEN, secret_key => KEY, locale=>"uk");
-our $ua_jp = Net::Amazon->new(token => TOKEN, secret_key => KEY, locale=>"jp");
+our $ua_us; 
+our $ua_uk; 
 use Time::HiRes qw/gettimeofday tv_interval/;
 use Data::Page;
 use EraEight::DBI;
@@ -31,6 +28,10 @@ sub import {
     my $self = shift;
     my %args = @_;
     my $mw = HTTP::Engine::Middleware->new( { method_class => 'HTTP::Engine::Request' });
+
+    $ua_us = Net::Amazon->new(token => $args{amazon_key_id}, secret_key => $args{amazon_secret_key}); 
+    $ua_uk = Net::Amazon->new(token => $args{amazon_key_id}, secret_key => $args{amazon_secret_key}, locale=>"uk");
+
     use EraEight::DBI;
     EraEight::DBI->load($args{dsn});
     $mw->install( 'HTTP::Engine::Middleware::Static' => {
