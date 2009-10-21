@@ -124,7 +124,7 @@ sub _do_one_catalogue {
             next unless $dbc->{books_we_have}->{$id};
             my @rows = split /\xfe/;
             my $score = 1;
-            if ($dbc->{loans}{$id}) { $score = 1+log(1+$dbc->{loans}{$id}{loancount}) } 
+            if ($dbc->{loans}{$id}) { $score = (1+$dbc->{loans}{$id}{loancount}) } 
             my $book = { 
                 id => $id,
                 score      => $score,
