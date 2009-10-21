@@ -119,8 +119,7 @@ sub _do_one_catalogue {
                 print "\n" unless $cc % 5000;
             }
             my $id = substr($_, 0, ord($2)-128, "");
-            $dbc->{search}->execute($id);
-            next unless @{$dbc->{search}->fetchall_arrayref};
+            next unless $dbc->{books_we_have}->{$id};
             my @rows = split /\xfe/;
             my $book = { 
                 id => $id,

@@ -19,7 +19,7 @@ sub prepare {
 
     $self->{ $_ } = $dbh->prepare_cached("INSERT INTO $_ VALUES (?, ?)")
         for qw(classmarks catcode1 catcode2 catcode3 editors);
-    $self->{search} = $dbh->prepare_cached("SELECT * FROM accessions WHERE book = ?");
+    $self->{books_we_have} = $dbh->selectall_hashref("SELECT DISTINCT book FROM accessions", "book");
     $self->{auth} = $dbh->prepare_cached("INSERT INTO authors (book, firstname, lastname) VALUES (?, ?, ?)");
     $self->{book} = $dbh->prepare_cached("INSERT INTO books VALUES (?,?,?,?,?,?,?,?,?,?)");
 }
