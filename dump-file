@@ -2,7 +2,7 @@
 use File::Slurp;
 use DBI;
 my $data = read_file(shift);
-my @records = split /(?=.[\200-\210])/ms, $data;
+my @records = split /(?=.[\200-\220])/ms, $data;
 for (@records) {
     s/\0+//g; next unless /\xfe/; s/^(.)(.)// or next;
     my $id = substr($_, 0, ord($2)-128, "");
