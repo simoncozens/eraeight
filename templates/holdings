@@ -10,15 +10,8 @@
         END;
         " (Due back "; l.due.ymd; ")";
     ELSE;
-    # This part is Redcliffe specific
-    IF h.location == "M"; 
-        SET c = book.classmarks.first.classmark;
-        IF c >= 220 AND c < 230; "Library 1 (upstairs next to Colin's office)";
-        ELSIF c >= 270 AND c <= 399; "Library 5 (upstairs next to stairs)";
-        ELSIF c >= 261.8 AND c < 270; "Library 4 (next to lecture hall)";
-        ELSIF c >= 230 AND c < 261.8; "Library 3 (opposite Bursar's office)";
-        ELSE; "Library 2 (Reference library)";
-        END;
+    # Ideally we should get these from the locations table.
+    IF h.location == "M"; "Main library";
     ELSIF h.location == "R"; "Reference Room";
     ELSIF h.location == "RR"; "Resource Room";
     ELSIF h.location == "S"; "Stack (see librarian)";
