@@ -20,4 +20,4 @@ use EraEight::CatalogueImporter::DBI;
 use EraEight::CatalogueImporter::KinoSearch;
 my $cb = EraEight::CatalogueImporter::DBI->new("dbi:SQLite:heritage.db");
 my $cb2 = EraEight::CatalogueImporter::KinoSearch->new("kinoindex");
-#EraEight::Import->import_main_catalogue($cb, $cb2);
+EraEight::Import->import_main_catalogue($dir, $cb, $cb2);
