@@ -1,4 +1,5 @@
 package EraEight::Import;
+use File::Basename;
 use strict;
 $EraEight::Import::progress = 1;
 use File::Slurp;
@@ -15,30 +16,57 @@ our %tables = (
 
 sub import_simple_table {
     my ($self, $dbh, $file) = @_;
-    if (!exists $tables{$file}) { die "$file isn't a simple table, can't import!"; }
-    my ($tablename, @cols) = @{$tables{$file}};
-    $dbh->do("CREATE TABLE IF NOT EXISTS $tablename (".join(",",@cols).");");
-    my $sth = $dbh->prepare_cached("INSERT INTO $tablename VALUES (".
-        join("," ,map { "?" } @cols).")");
-    my $data = read_file("$file.ov").(-e "$file.lk" && read_file("$file.lk"));
-    my @records = split /(?=.[\200-\210])/ms, $data;
-    if ($EraEight::Import::progress) { print "Importing $file ($tablename)\n" }
-    my $cc = 0;
-    if ($EraEight::Import::progress) { $| = 1; }
-    for (@records) {
-        s/\0+//g; next unless /\xfe/; s/^(.)(.)// or next;
-        my $id = substr($_, 0, ord($2)-128, "");
-        next unless $id;
-            $cc++; 
-            if ($EraEight::Import::progress) {
-                print "." unless $cc % 100;
-                print "+" unless $cc % 1000;
-                print "\n" unless $cc % 5000;
-            }
-        s/\375/ and /g;
-        my @rows = ($id, split /\xfe/, $_);
-        $sth->execute(@rows[0..$#cols]);
+    if (!exists $tables{basename $file}) { die "$file isn't a simple table, can't import!"; }
+    my ($tablename, @cols) = @{$tables{basename $file}};
+    $dbh->{RaiseError} = 1;
+    return unless file_has_changed($dbh, $file, $tablename);
+    $dbh->{AutoCommit} = 0;
+    eval { 
+        $dbh->do("CREATE TABLE IF NOT EXISTS $tablename (".join(",",@cols).");");
+        $dbh->do("DELETE FROM $tablename");
+        my $sth = $dbh->prepare_cached("INSERT INTO $tablename VALUES (".
+            join("," ,map { "?" } @cols).")");
+        my $data = read_file("$file.ov").(-e "$file.lk" && read_file("$file.lk"));
+        my @records = split /(?=.[\200-\210])/ms, $data;
+        if ($EraEight::Import::progress) { print "Importing $file ($tablename)\n" }
+        my $cc = 0;
+        if ($EraEight::Import::progress) { $| = 1; }
+        for (@records) {
+            s/\0+//g; next unless /\xfe/; s/^(.)(.)// or next;
+            my $id = substr($_, 0, ord($2)-128, "");
+            next unless $id;
+                $cc++; 
+                if ($EraEight::Import::progress) {
+                    print "." unless $cc % 100;
+                    print "+" unless $cc % 1000;
+                    print "\n" unless $cc % 5000;
+                }
+            s/\375/ and /g;
+            my @rows = ($id, split /\xfe/, $_);
+            $sth->execute(@rows[0..$#cols]);
+        }
+        if ($EraEight::Import::progress) {print "\n"}
+        $dbh->commit;
+    };
+    if ($@) {
+        warn "Transaction aborted because $@";
+        eval { $dbh->rollback };
     }
+}
+
+sub file_has_changed {
+    my ($dbh, $file, $tablename) = @_;
+    $dbh->do("CREATE TABLE IF NOT EXISTS importhistory (tablename, timestamp)");
+    my ($timestampl, $timestampo) = ((stat($file.".lk"))[9], (stat($file.".ov"))[9]);
+    my $timestamp = [$timestampl => $timestampo]->[$timestampl <= $timestampo];
+    my $import = $dbh->selectall_hashref("SELECT tablename, max(timestamp) lastimport FROM importhistory GROUP BY tablename", "tablename");
+    if ($import->{$tablename} and $import->{$tablename}->{lastimport} >= $timestamp) { 
+        print "$tablename is current, skipping\n" if $EraEight::Import::progress;
+        return 0;
+    }
+    $dbh->do("INSERT INTO importhistory VALUES (?, ?)", {}, $tablename, $timestamp);
+    $dbh->commit;
+    return 1;
 }
 
 sub import_main_catalogue {
