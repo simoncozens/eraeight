@@ -1,0 +1,10 @@
+ <pre style="margin-left:20px;
+ background: #efefff; margin:10px; padding: 5px; width: 80%; font-size: 9pt">
+ @book{[%book.authors.first.lastname | lower; book.year; book.title.replace("\\W.*","") | lower; %],
+ Author = { [% FOR a = book.authors; a.lastname; ", "; a.firstname; IF a != book.authors.last; " and "; END; END; %] },
+ Title = { [%book.title %] },
+ Publisher = { [%book.publisher %] },
+ [% IF book.address %]Address = { [%book.address %] }, [% END %]
+ Year = { [%book.year%] }
+ }
+ </pre>

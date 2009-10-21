@@ -1,0 +1,39 @@
+[% INCLUDE minisearch %]
+
+<div style="float:right; margin-right:30px; text-align:center">
+[% IF book.amazon AND book.amazon.imageurlmedium %]<img src="[%book.amazon.imageurlmedium%]"/>[% END %]
+[% INCLUDE gpreview %]
+</div>
+<h1>[%book.title%]</h1>
+ <p> [% IF book.authors %]by [%FOR a = book.authors %]
+ [% a.firstname; " "; a.lastname; "," UNLESS a == book.authors.last %]
+ [% END;%][% END%]
+ </p>
+ <table>
+    <tr><th>Classmark</th> <td> [% FOR c = book.classmarks %] [% c.classmark; END %]</td></tr>
+    [% FOR col = ["year", "publisher", "dimensions", "edition", "notes",
+    "address"] %]
+        [% IF book.$col %]
+        <tr><th align="left">[%col |ucfirst%]</th><td>[%book.$col%]</td></tr>[% END %]
+    [% END %]
+</table>
+
+
+<div id="tabs">
+    <ul>
+        <li><a href="#tabs-1">Holdings</a></li>
+        [% IF book.amazon.productdescription %] <li><a href="#tabs-2">Description</a></li> [% END %]
+        <li><a href="#tabs-3">Bibliographic Citation</a></li>
+    </ul>
+    <div id="tabs-1"> [% INCLUDE holdings %] </div>
+[% IF book.amazon.productdescription %] 
+    <div id="tabs-2"> <h3> Description </h3>
+    <p> [%book.amazon.productdescription %] </p> 
+    </div>
+[% END %]
+    <div id="tabs-3">
+[% INCLUDE harvard %]
+[% INCLUDE bibtex %]
+</div>
+<script type="text/javascript"> $(function() { $("#tabs").tabs(); }); </script>
+

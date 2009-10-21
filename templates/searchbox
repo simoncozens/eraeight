@@ -1,0 +1,17 @@
+<span id="body"><center>
+<br clear="all" id="lgpd"><img width="276" height="110" id="logo" src="/static/EraEight.gif" alt="Era8"><br><br><form name="f" action="/search">
+<table cellspacing="0" cellpadding="0">
+<tr valign="top">
+<td width="25%"> </td>
+<td nowrap align="center">
+<input value="" title="Search" class="lst" size="55" name="q"
+maxlength="2048" autocomplete="off"><br><input type="submit"
+onclick="this.checked=1" class="lsb" value="Search Redcliffe Library"
+name="btnG"><input type="submit" value="I'm Feeling Lucky" name="btnI"
+class="lsb">
+</td>
+<td width="25%" nowrap align="left"><font size="-2">  <a href="/advsearch">Advanced Search</a>
+</tr>
+</table>
+<br>
+</center></span>

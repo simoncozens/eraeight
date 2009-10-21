@@ -1,0 +1,24 @@
+[% MACRO link_page(num) BLOCK; %]
+      [% IF num == pager.current_page %]
+            [% num %]
+      [% ELSE %]
+      <a href="?page=[% num %]&q=[% req.parameters.q |uri%]">
+            [% num %]
+      </a>
+      [% END %]
+[% END %]
+[% IF pager.last_page > 1;
+    SET begin_page = pager.current_page - 5;
+    IF begin_page < 1;
+        SET begin_page = pager.first_page;
+    END;
+    SET end_page = pager.current_page + 5;
+    IF pager.last_page < end_page;
+        SET end_page = pager.last_page;
+    END;
+    IF begin_page != 1; link_page(1); " ... "; END;
+     FOREACH num = [begin_page .. end_page];
+        link_page(num); %] &nbsp; [%
+     END;
+    IF end_page != pager.last_page; "..."; link_page(pager.last_page); END;
+END %]

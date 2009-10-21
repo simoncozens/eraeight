@@ -1,0 +1,28 @@
+[% INCLUDE minisearch %]
+<p>
+    Results [%pager.first%] to [%pager.last%] of [%pager.total_entries%]
+    for "[%req.parameters.q |html%]"
+</p>
+<center>
+[% INCLUDE pager %]    
+</center>
+<table>
+[% FOR book = books %]
+<p>
+ <a href="/details?book=[%book.book%]">[% book.title %]</a>  
+ <small> [% IF book.authors %]by [%FOR a = book.authors %]
+ [% a.firstname; " "; a.lastname; "," UNLESS a == book.authors.last %]
+ [% END;%][% END%]
+ </small><br/>
+ <div style="margin-left:20px; margin-top:0; padding:0">
+[% SET h = book.holdings; SET in = 0; FOR x = h; SET in = in + 1 UNLESS x.on_loan; END; %]
+     <small>Copies available: [% in %] of [% h.size %]</small>
+<br>
+ </div>
+</p>
+
+[% END %]
+</table>
+<center>
+[% INCLUDE pager %]    
+</center>

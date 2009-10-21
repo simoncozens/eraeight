@@ -1,0 +1,24 @@
+<h3> Holdings </h3>
+<ul>
+[% FOR h = book.holdings %]
+    <li> [% h.accession %] 
+    [% SET l = h.on_loan; IF l; "<i>On loan to "; l; "</i>"; ELSE;
+    # This part is Redcliffe specific
+    IF h.location == "M"; 
+        SET c = book.classmarks.first.classmark;
+        IF c >= 220 AND c < 230; "Library 1 (upstairs next to Colin's office)";
+        ELSIF c >= 270 AND c <= 399; "Library 5 (upstairs next to stairs)";
+        ELSIF c >= 261.8 AND c < 270; "Library 4 (next to lecture hall)";
+        ELSIF c >= 230 AND c < 261.8; "Library 3 (opposite Bursar's office)";
+        ELSE; "Library 2 (Reference library)";
+        END;
+    ELSIF h.location == "R"; "Reference Room";
+    ELSIF h.location == "RR"; "Resource Room";
+    ELSIF h.location == "S"; "Stack (see librarian)";
+    ELSIF h.location == "P"; "Periodicals collection";
+    ELSIF h.location == "V"; "Video library";
+    END;
+    END;
+    %] 
+[% END %]
+</ul>

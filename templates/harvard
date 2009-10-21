@@ -1,0 +1,12 @@
+ <div style="margin-left:20px;
+ background: #efefff; margin:10px; padding: 5px; width: 80%; font-size: 9pt">
+  [% SET cmax = book.authors.size; SET cmax = 3 IF cmax > 4;
+  SET count = 0; FOR a = book.authors; SET count = count + 1; %]
+ [% a.lastname; ", "; a.firstname.substr(0,1); "."; 
+    IF book.authors.size > 4 AND count == 3; " et al."; LAST; END; 
+    IF a != book.authors.last AND count < (cmax - 1); " &amp "; END;
+    IF a != book.authors.last AND count == (cmax - 1); " and "; END;
+%]
+ [% END;%]
+ ([%book.year%]) <i>[%book.title%]</i>, [%IF book.address; book.address;": ";END; book.publisher%]
+ </div>

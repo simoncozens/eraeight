@@ -1,0 +1,9 @@
+[% IF book.id %]
+<script type="text/javascript" src="http://books.google.com/books/previewlib.js"></script>
+<p>
+<script type="text/javascript">
+GBS_insertPreviewButtonLink('ISBN:'+[%book.id%]);
+</script>
+</p>
+
+[% END %]

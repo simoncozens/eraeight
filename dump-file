@@ -1,0 +1,13 @@
+#!/usr/bin/perl
+use File::Slurp;
+use DBI;
+my $data = read_file(shift);
+my @records = split /(?=.[\200-\210])/ms, $data;
+for (@records) {
+    s/\0+//g; next unless /\xfe/; s/^(.)(.)// or next;
+    my $id = substr($_, 0, ord($2)-128, "");
+    next unless $id;
+    s/\375/ and /g;
+    my @rows = ($id, split /\xfe/, $_);
+    print join"\t", @rows,"\n";
+}
