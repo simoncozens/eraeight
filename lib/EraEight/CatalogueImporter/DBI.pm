@@ -11,6 +11,7 @@ sub new {
 
 sub prepare {
     my $self = shift; my $dbh = $self->{dbh};
+    $dbh->do("CREATE TABLE IF NOT EXISTS amazon (book, imageurlmedium, imageurllarge, productdescription)");
     $dbh->do("CREATE TABLE IF NOT EXISTS authors (id integer primary key not null, book, firstname, lastname);");
     $dbh->do("CREATE TABLE IF NOT EXISTS editors (book, name);");
     $dbh->do("CREATE TABLE IF NOT EXISTS classmarks (book, classmark);");
