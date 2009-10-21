@@ -52,27 +52,51 @@ sub import_simple_table {
         warn "Transaction aborted because $@";
         eval { $dbh->rollback };
     }
+    successful_import($dbh, $file, $tablename);
+}
+
+sub _timestamp {
+    my $file = shift;
+    my ($timestampl, $timestampo) = ((stat($file.".lk"))[9], (stat($file.".ov"))[9]);
+    return [$timestampl => $timestampo]->[$timestampl <= $timestampo];
 }
 
 sub file_has_changed {
     my ($dbh, $file, $tablename) = @_;
     $dbh->do("CREATE TABLE IF NOT EXISTS importhistory (tablename, timestamp)");
-    my ($timestampl, $timestampo) = ((stat($file.".lk"))[9], (stat($file.".ov"))[9]);
-    my $timestamp = [$timestampl => $timestampo]->[$timestampl <= $timestampo];
     my $import = $dbh->selectall_hashref("SELECT tablename, max(timestamp) lastimport FROM importhistory GROUP BY tablename", "tablename");
-    if ($import->{$tablename} and $import->{$tablename}->{lastimport} >= $timestamp) { 
+    if ($import->{$tablename} and $import->{$tablename}->{lastimport} >= _timestamp($file)) {
         print "$tablename is current, skipping\n" if $EraEight::Import::progress;
         return 0;
     }
-    $dbh->do("INSERT INTO importhistory VALUES (?, ?)", {}, $tablename, $timestamp);
-    $dbh->commit;
     return 1;
 }
 
+sub successful_import {
+    my ($dbh, $file, $tablename) = @_;
+    $dbh->do("INSERT INTO importhistory VALUES (?, ?)", {}, $tablename, _timestamp($file));
+    $dbh->commit;
+}
+
 sub import_main_catalogue {
-    my ($self, @callbacks) = @_;
-    _do_one_catalogue("REV40033.LK", @callbacks);
-    _do_one_catalogue("REV40033.OV", @callbacks);
+    my ($self, $datadir, @callbacks) = @_;
+    my ($dbc) = grep { ref $_ eq "EraEight::CatalogueImporter::DBI" } @callbacks;
+    die "At least one callback needs to be DBI backed, and you need to have imported accessions already " unless $dbc;
+    $dbc->{dbh}->{AutoCommit} = 0;
+    $dbc->{dbh}->{RaiseError} = 1;
+    return unless file_has_changed($dbc->{dbh}, "$datadir/REV40033", "catalogue");
+    eval {
+        $dbc->clearout();
+        $dbc->prepare();
+        _do_one_catalogue("$datadir/REV40033.LK", @callbacks);
+        _do_one_catalogue("$datadir/REV40033.OV", @callbacks);
+        $dbc->{dbh}->commit;
+    };
+    if ($@) {
+        warn "Transaction aborted because $@";
+        eval { $dbc->{dbh}->rollback };
+    }
+    successful_import($dbc->{dbh}, "$datadir/REV40033", "catalogue");
 }
 
 sub _do_one_catalogue {
