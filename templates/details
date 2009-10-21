@@ -28,7 +28,7 @@
     <div id="tabs-1"> [% INCLUDE holdings %] </div>
 [% IF book.amazon.productdescription %] 
     <div id="tabs-2"> <h3> Description </h3>
-    <p> [%book.amazon.productdescription %] </p> 
+    <p> [%book.amazon.productdescription |replace('</?DIV>', "") %] </p> 
     </div>
 [% END %]
     <div id="tabs-3">
