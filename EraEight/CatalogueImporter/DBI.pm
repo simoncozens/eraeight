@@ -19,8 +19,10 @@ sub prepare {
 
     $self->{ $_ } = $dbh->prepare_cached("INSERT INTO $_ VALUES (?, ?)")
         for qw(classmarks catcode1 catcode2 catcode3 editors);
-    $dbh->do("create index if not exists accession_lookup on accessions (accession)")
+    $dbh->do("create index if not exists accession_lookup on accessions (accession)");
     $dbh->do("create index if not exists book_lookup on books (book)");
+    $self->{loans} = $dbh->selectall_hashref("select book, count(*) loancount from accessions, loanhistory where loanhistory.accession = accessions.accession group by book order by count(*)", "book");
+
     $self->{books_we_have} = $dbh->selectall_hashref("SELECT DISTINCT book FROM accessions", "book");
     $self->{auth} = $dbh->prepare_cached("INSERT INTO authors (book, firstname, lastname) VALUES (?, ?, ?)");
     $self->{book} = $dbh->prepare_cached("INSERT INTO books VALUES (?,?,?,?,?,?,?,?,?,?)");

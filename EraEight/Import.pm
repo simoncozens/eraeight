@@ -7,6 +7,8 @@ use DBI;
 
 our %tables = (
     REV40000 => [accessions => qw/accession book status loantype location category copies/],
+    REV40001 => [accessionstatus => qw/status desc/],
+    REV40013 => [loanhistory => qw/timestamp accession userid/],
     REV40031 => [booksout => qw/accession userid status timestamp issued returndate /],
     REV40044 => [users => qw/userid title first last status/],
     REV40045 => [userstatus => qw/status desc /],
@@ -27,7 +29,7 @@ sub import_simple_table {
         my $sth = $dbh->prepare_cached("INSERT INTO $tablename VALUES (".
             join("," ,map { "?" } @cols).")");
         my $data = read_file("$file.ov").(-e "$file.lk" && read_file("$file.lk"));
-        my @records = split /(?=.[\200-\210])/ms, $data;
+        my @records = split /(?=.[\200-\220])/ms, $data;
         if ($EraEight::Import::progress) { print "Importing $file ($tablename)\n" }
         my $cc = 0;
         if ($EraEight::Import::progress) { $| = 1; }
@@ -121,8 +123,11 @@ sub _do_one_catalogue {
             my $id = substr($_, 0, ord($2)-128, "");
             next unless $dbc->{books_we_have}->{$id};
             my @rows = split /\xfe/;
+            my $score = 1;
+            if ($dbc->{loans}{$id}) { $score = 1+log(1+$dbc->{loans}{$id}{loancount}) } 
             my $book = { 
                 id => $id,
+                score      => $score,
                 editors    => [ split /\375/, $rows[5]  ] ,
                 classmarks => [ split /\375/, $rows[11] ] ,
                 catcode1   => [ split /\375/, $rows[13] ] ,

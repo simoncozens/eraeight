@@ -37,6 +37,7 @@ sub index {
     $doc->set_value( author => join " ", map { join " ", $_->{first}, $_->{last} } @{$book->{authors}});
     $doc->set_value( editor => join " ", @{$book->{editors}});
     $doc->set_value( classmark => join " ", @{$book->{editors}});
+    $doc->set_boost($book->{score});
     $self->{invindexer}->add_doc($doc);
 }
 
