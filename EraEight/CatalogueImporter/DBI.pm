@@ -5,8 +5,12 @@ use DBI;
 sub new {
     my ($class, @db_connect_args) = @_;
     my $self = bless {}, $class;
-    my $dbh = $self->{dbh} = DBI->connect(@db_connect_args) or die "Couldn't connect to database $db_connect_args[0]";
+    $self->{dbh} = DBI->connect(@db_connect_args) or die "Couldn't connect to database $db_connect_args[0]";
+    return $self;
+}
 
+sub prepare {
+    my $self = shift; my $dbh = $self->{dbh};
     $dbh->do("CREATE TABLE IF NOT EXISTS authors (id integer primary key not null, book, firstname, lastname);");
     $dbh->do("CREATE TABLE IF NOT EXISTS editors (book, name);");
     $dbh->do("CREATE TABLE IF NOT EXISTS classmarks (book, classmark);");
@@ -18,7 +22,12 @@ sub new {
     $self->{search} = $dbh->prepare_cached("SELECT * FROM accessions WHERE book = ?");
     $self->{auth} = $dbh->prepare_cached("INSERT INTO authors (book, firstname, lastname) VALUES (?, ?, ?)");
     $self->{book} = $dbh->prepare_cached("INSERT INTO books VALUES (?,?,?,?,?,?,?,?,?,?)");
-    return $self;
+}
+
+sub clearout {
+    my $dbc = shift;
+    $dbc->{dbh}->do("DROP TABLE IF EXISTS $_")
+        for qw/books authors editors classmarks catcode1 catcode2 catcode3/;
 }
 
 sub index {
