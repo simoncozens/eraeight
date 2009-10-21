@@ -27,9 +27,17 @@ my $query_parser = KinoSearch::QueryParser::QueryParser->new(
 
 sub import {
     my $self = shift;
-    my %args = @_;
+    my %args = ( # Defaults go first
+        dsn => "dbi:SQLite:heritage.db",
+        interface => "ServerSimple",
+        template_path => ["user_templates", "templates"],
+        port => "4848",
+        host => "0.0.0.0",
+        @_
+    );
     my $mw = HTTP::Engine::Middleware->new( { method_class => 'HTTP::Engine::Request' });
-
+    if (!$args{amazon_key_id}) { die "You need to include your Amazon key" };
+    if (!$args{amazon_secret_key}) { die "You need to include your Amazon secret" };
     $ua_us = Net::Amazon->new(token => $args{amazon_key_id}, secret_key => $args{amazon_secret_key}); 
     $ua_uk = Net::Amazon->new(token => $args{amazon_key_id}, secret_key => $args{amazon_secret_key}, locale=>"uk");
 
