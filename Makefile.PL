@@ -15,6 +15,7 @@ WriteMakefile(
         Class::DBI::Loader::SQLite => 0,
         DBD::SQLite => 0,
         Template => 0,
+        Time::Piece => 0,
     }
 );
 

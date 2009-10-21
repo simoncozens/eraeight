@@ -1,5 +1,6 @@
 package EraEight::DBI;
 use Class::DBI::Loader;
+use Time::Piece;
 
 sub load {
     my ($self, $dsn) = @_;
@@ -24,6 +25,9 @@ sub EraEight::Books::amazon {
 sub EraEight::Accessions::on_loan {
     my ($loan) = EraEight::Booksout->search(accession  => shift->accession);
     return unless $loan;
-    return $loan->userid->first()." ".$loan->userid->last();
+    return { to => $loan->userid->first()." ".$loan->userid->last(),
+             due => Time::Piece->new($loan->day_due),
+             overdue => ($loan->day_due > time)
+           };
 }
 1;
