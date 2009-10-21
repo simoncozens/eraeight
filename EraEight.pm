@@ -34,10 +34,13 @@ sub import {
 
     use EraEight::DBI;
     EraEight::DBI->load($args{dsn});
-    $mw->install( 'HTTP::Engine::Middleware::Static' => {
-        regexp  => qr{^/static/(.+)$},
-        docroot => $args{template_path}
-    });
+    for (@{ref($args{template_path}) ? $args{template_path} : [$args{template_path}]}) {
+        $mw->install( 'HTTP::Engine::Middleware::Static' => {
+            regexp  => qr{^/static/(.+)$},
+            docroot => $_,
+            is_404_handler => 0,
+        });
+    }
     my $t = Template->new({
         INCLUDE_PATH => $args{template_path},
         PRE_PROCESS  => "header",
