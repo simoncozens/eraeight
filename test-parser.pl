@@ -1,14 +1,8 @@
 #!/usr/bin/perl
+use EraEight::Import;
 use Data::Dumper;
 $Data::Dumper::Indent=0;
-our %tables = (
-    REV40000 => [accessions => qw/accession book status loantype location category copies/],
-    REV40031 => [booksout => qw/accession userid status timestamp issued returndate /],
-    REV40044 => [users => qw/userid title first last status/],
-    REV40045 => [userstatus => qw/status desc /],
-    REV40065 => [catcode3desc => qw/code desc /],
-
-);
+our %tables = %EraEight::Import::tables;
 
 for (sort keys %tables) { 
     dump_a_file($_.".OV", $tables{$_}); 
@@ -44,6 +38,7 @@ format STDOUT =
     $- = 0;
 }
 
+exit;
 # Now let's try to read the catalogue
 _do_one_catalogue("REV40033.LK");
 _do_one_catalogue("REV40033.OV");
