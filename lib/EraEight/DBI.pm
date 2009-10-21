@@ -27,7 +27,7 @@ sub EraEight::Accessions::on_loan {
     return unless $loan;
     return { to => $loan->userid->first()." ".$loan->userid->last(),
              due => Time::Piece->new($loan->day_due),
-             overdue => ($loan->day_due > time)
+             overdue => (time > $loan->day_due)
            };
 }
 1;
