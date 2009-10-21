@@ -7,7 +7,7 @@ sub new {
     my $self = bless {}, $class;
     my $dbh = $self->{dbh} = DBI->connect(@db_connect_args) or die "Couldn't connect to database $db_connect_args[0]";
 
-    $dbh->do("CREATE TABLE IF NOT EXISTS authors (book, firstname, lastname);");
+    $dbh->do("CREATE TABLE IF NOT EXISTS authors (id integer primary key not null, book, firstname, lastname);");
     $dbh->do("CREATE TABLE IF NOT EXISTS editors (book, name);");
     $dbh->do("CREATE TABLE IF NOT EXISTS classmarks (book, classmark);");
     $dbh->do("CREATE TABLE IF NOT EXISTS catcode$_ (book, category);") for 1..3;
@@ -16,7 +16,7 @@ sub new {
     $self->{ $_ } = $dbh->prepare_cached("INSERT INTO $_ VALUES (?, ?)")
         for qw(classmarks catcode1 catcode2 catcode3 editors);
     $self->{search} = $dbh->prepare_cached("SELECT * FROM accessions WHERE book = ?");
-    $self->{auth} = $dbh->prepare_cached("INSERT INTO authors VALUES (?, ?, ?)");
+    $self->{auth} = $dbh->prepare_cached("INSERT INTO authors (book, firstname, lastname) VALUES (?, ?, ?)");
     $self->{book} = $dbh->prepare_cached("INSERT INTO books VALUES (?,?,?,?,?,?,?,?,?,?)");
     return $self;
 }
