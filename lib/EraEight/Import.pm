@@ -9,12 +9,21 @@ our %tables = (
     REV40000 => [accessions => qw/accession book status loantype location category copies/],
     REV40001 => [accessionstatus => qw/status desc/],
     REV40013 => [loanhistory => qw/timestamp accession userid/],
-    REV40031 => [booksout => qw/accession userid status timestamp issued returndate /],
+    REV40031 => [booksout => qw/accession userid status timestamp day_issued day_due /],
     REV40044 => [users => qw/userid title first last status/],
     REV40045 => [userstatus => qw/status desc /],
-    REV40065 => [catcode3desc => qw/code desc /],
-
 );
+
+our %complex_tables = (
+    REV40065 => [subjects => qw/code desc bookcount classmarks books/],
+    
+);
+
+use Time::Piece;
+use Time::Seconds;
+
+my $pick_epoch = Time::Piece->strptime("1967-12-31", "%F");
+sub pick2unix { return ($pick_epoch + ONE_DAY*shift)->epoch }
 
 sub import_simple_table {
     my ($self, $dbh, $file) = @_;
@@ -45,6 +54,9 @@ sub import_simple_table {
                 }
             s/\375/ and /g;
             my @rows = ($id, split /\xfe/, $_);
+            for (0..$#cols) {
+                if ($cols[$_] =~ /day_/) { $rows[$_] = pick2unix($rows[$_]); }
+            }
             $sth->execute(@rows[0..$#cols]);
         }
         if ($EraEight::Import::progress) {print "\n"}
