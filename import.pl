@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+use lib 'lib';
 use DBI;
 my $dir = shift;
 if (!-d $dir) {
