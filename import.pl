@@ -13,9 +13,9 @@ my $dbh = DBI->connect("dbi:SQLite:heritage.db");
 use EraEight::Import;
 use File::Basename;
 EraEight::Import->import_simple_table($dbh, $_) for 
-    grep { exists $EraEight::Import::tables{basename $_} }
-    map { s/\.OV$//i; $_ }
-    glob("$dir/*.OV");
+    grep { exists $EraEight::Import::tables{uc basename $_} }
+    map { s/\.OV$//i;  $_ }
+    (glob("$dir/*.OV"), glob("$dir/*.ov"));
 
 use EraEight::CatalogueImporter::DBI;
 use EraEight::CatalogueImporter::KinoSearch;

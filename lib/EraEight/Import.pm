@@ -1,7 +1,7 @@
 package EraEight::Import;
 use File::Basename;
 use strict;
-$EraEight::Import::progress = 1;
+$EraEight::Import::progress = 0;
 use File::Slurp;
 use DBI;
 
@@ -25,6 +25,13 @@ use Time::Seconds;
 my $pick_epoch = Time::Piece->strptime("1967-12-31", "%F");
 sub pick2unix { return ($pick_epoch + ONE_DAY*shift)->epoch }
 
+my %directory;
+# Heritage uses random-casing on its files. Urgh.
+sub smashcase {
+    my $file = shift;
+    %directory = map { uc$_ => $_} glob(dirname($file)."/*.*") unless %directory;
+    return $directory{uc $file};
+}
 sub import_simple_table {
     my ($self, $dbh, $file) = @_;
     if (!exists $tables{basename $file}) { die "$file isn't a simple table, can't import!"; }
@@ -37,7 +44,8 @@ sub import_simple_table {
         $dbh->do("DELETE FROM $tablename");
         my $sth = $dbh->prepare_cached("INSERT INTO $tablename VALUES (".
             join("," ,map { "?" } @cols).")");
-        my $data = read_file("$file.ov").(-e "$file.lk" && read_file("$file.lk"));
+        my $data = read_file(smashcase("$file.OV")).(-e smashcase("$file.LK") && read_file(smashcase("$file.LK")));
+$data||die "No data for $file!";
         my @records = split /(?=.[\200-\220])/ms, $data;
         if ($EraEight::Import::progress) { print "Importing $file ($tablename)\n" }
         my $cc = 0;
@@ -71,7 +79,7 @@ sub import_simple_table {
 
 sub _timestamp {
     my $file = shift;
-    my ($timestampl, $timestampo) = ((stat($file.".lk"))[9], (stat($file.".ov"))[9]);
+    my ($timestampl, $timestampo) = ((stat(smashcase($file.".LK")))[9], (stat(smashcase($file.".OV")))[9]);
     return [$timestampl => $timestampo]->[$timestampl <= $timestampo];
 }
 
@@ -115,6 +123,7 @@ sub import_main_catalogue {
 
 sub _do_one_catalogue {
     my ($filename, @callbacks) = @_;
+    $filename = smashcase($filename);
     open my $in, $filename or die "Couldn't open $filename: $!";
     my ($dbc) = grep { ref $_ eq "EraEight::CatalogueImporter::DBI" } @callbacks;
     die "At least one callback needs to be DBI backed, and you need to have imported accessions already " unless $dbc;
