@@ -15,8 +15,8 @@
  [% END;%][% END%]
  </small><br/>
  <div style="margin-left:20px; margin-top:0; padding:0">
-[% SET h = book.holdings; SET in = 0; FOR x = h; SET in = in + 1 UNLESS x.on_loan; END; %]
-     <small>Copies available: [% in %] of [% h.size %]</small>
+[% SET h = book.holdings; SET in = 0; SET all = 0; FOR x = h; SET all = all+1; SET in = in + 1 UNLESS x.on_loan; END; %]
+     <small>Copies available: [% in %] of [% all %]</small>
 <br>
  </div>
 </p>
