@@ -99,7 +99,8 @@ sub _try_amazon {
 
 sub details {
     my ($self, $req, $book) = @_;
-    $book ||= EraEight::Books->search(book => $req->parameters()->{book});
+    ($book) = EraEight::Books->search(book => $req->parameters()->{book})
+        if !$book;
     if (!$book) { return $self->respond($req, "", "searchbox"); }
     if ($book->book =~ /^[0-9X]{10}$/ and !$book->amazon and fork) {
         _try_amazon($book->book, $ua_us) ||
