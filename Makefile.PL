@@ -8,8 +8,7 @@ perl_version '5.006';
 all_from    "lib/EraEight.pm",
 requires	"KinoSearch" => 0;
 requires	"MIME::Types" => 0;
-requires	"HTTP::Engine" => 0;
-requires	"HTTP::Engine::Middleware" => 0;
+requires	"Plack" => 0;
 requires	"List::Util" => 0;
 requires	"Net::Amazon" => 0;
 requires	"File::Slurp" => 0;
