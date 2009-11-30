@@ -80,9 +80,9 @@ sub handle_request {
     if ($q) { 
         my ($pager, @books) = search($q, $req->parameters()->{page}, $req->parameters()->{epp});
         if ($req->parameters()->{btnI}) { return $self->details($req, $books[0]) }
-        return $self->respond($req, "", "results", books => \@books, pager => $pager);
+        return $self->respond($req, "results", books => \@books, pager => $pager);
     }
-    return $self->respond($req, "", "searchbox");
+    return $self->respond($req, "searchbox");
 }
 
 sub _try_amazon {
@@ -101,23 +101,22 @@ sub details {
     my ($self, $req, $book) = @_;
     ($book) = EraEight::Books->search(book => $req->parameters()->{book})
         if !$book;
-    if (!$book) { return $self->respond($req, "", "searchbox"); }
+    if (!$book) { return $self->respond($req, "searchbox"); }
     if ($book->book =~ /^[0-9X]{10}$/ and !$book->amazon and fork) {
         _try_amazon($book->book, $ua_us) ||
         _try_amazon($book->book, $ua_uk);
         exit;
     }
-    return $self->respond($req, "", "details", book => $book);
+    return $self->respond($req, "details", book => $book);
 }
 
 sub respond {
-    my ($self, $req, $action, $template, @args) = @_;
+    my ($self, $req, $template, @args) = @_;
     my $out;
     my $res = Plack::Response->new();
     $res->status(200);
     $self->{template_engine}->process($template, { 
         @args,
-        action => $action, 
         req => $req, 
         args => \%args,
         e8 => EraEight->new(),
