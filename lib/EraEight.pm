@@ -123,13 +123,6 @@ sub timecheck {
     return tv_interval ( $start, [gettimeofday()]);
 }
 
-sub its_all_gone_wrong {
-    my $self = shift;
-    my $res = HTTP::Engine::Response->new();
-    $res->body(shift);
-    return $res;
-}
-
 sub search {
     my $query = $query_parser->parse( shift  );
     my $hits  = $searcher->search( query => $query );
