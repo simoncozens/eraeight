@@ -27,6 +27,8 @@ my $query_parser = KinoSearch::QueryParser::QueryParser->new(
 use Plack::Request;
 use Plack::App::File;
 
+# The "web framework"
+
 sub app { 
     my $self = shift;
     %args = ( # Defaults go first
@@ -85,17 +87,21 @@ sub handle_request {
     return $self->respond($req, "searchbox");
 }
 
-sub _try_amazon {
-    my ($isbn, $ua) = @_;
-    return unless $ua;
-    my $response = $ua->search(asin => $isbn);
-    if (!$response->is_success()) { return; }
-    my ($prop) = $response->properties;
-    EraEight::Amazon->create({
-        book => $isbn,
-        map {lc$_ => $prop->$_() } qw/ImageUrlMedium ImageUrlLarge ProductDescription/
-    });
+sub respond {
+    my ($self, $req, $template, @args) = @_;
+    my $out;
+    my $res = Plack::Response->new();
+    $res->status(200);
+    $self->{template_engine}->process($template, { 
+        @args,
+        req => $req, 
+        args => \%args,
+        e8 => EraEight->new(),
+        }, \$out) ? $res->body($out) : $res->body($self->{template_engine}->error);
+    return $res;
 }
+
+# The actions
 
 sub details {
     my ($self, $req, $book) = @_;
@@ -110,19 +116,7 @@ sub details {
     return $self->respond($req, "details", book => $book);
 }
 
-sub respond {
-    my ($self, $req, $template, @args) = @_;
-    my $out;
-    my $res = Plack::Response->new();
-    $res->status(200);
-    $self->{template_engine}->process($template, { 
-        @args,
-        req => $req, 
-        args => \%args,
-        e8 => EraEight->new(),
-        }, \$out) ? $res->body($out) : $res->body($self->{template_engine}->error);
-    return $res;
-}
+# Utility methods
 
 sub timecheck {
     return unless $hires_loaded;
@@ -152,4 +146,17 @@ sub search {
     }
     return $p, @r;
 }
+
+sub _try_amazon {
+    my ($isbn, $ua) = @_;
+    return unless $ua;
+    my $response = $ua->search(asin => $isbn);
+    if (!$response->is_success()) { return; }
+    my ($prop) = $response->properties;
+    EraEight::Amazon->create({
+        book => $isbn,
+        map {lc$_ => $prop->$_() } qw/ImageUrlMedium ImageUrlLarge ProductDescription/
+    });
+}
+
 1;
