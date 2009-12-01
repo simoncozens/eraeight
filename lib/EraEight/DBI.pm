@@ -10,6 +10,9 @@ sub load {
         options => { AutoCommit => 1 },
         relationships => 1,
     );
+    foreach my $table ($loader->tables) {
+        $loader->find_class($table)->db_Main->func(20000, 'busy_timeout');
+    }
     $_->has_a("book" => "EraEight::Books")
         for qw/EraEight::Authors EraEight::Classmarks EraEight::Accessions/;
     $_->has_a("userid" => "EraEight::Users") for qw/EraEight::Booksout/;
