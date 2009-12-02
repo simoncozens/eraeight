@@ -15,6 +15,7 @@ requires	"Net::Amazon" => 0;
 requires	"File::Slurp" => 0;
 requires	"DBI" => 0;
 requires	"Data::Page" => 0;
+requires	"HTTP::Session" => 0;
 requires	"Class::DBI::Loader" => 0;
 requires	"Class::DBI::SQLite" => 0;
 requires	"DBD::SQLite" => 0;
