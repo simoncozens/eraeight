@@ -26,6 +26,10 @@ my $query_parser = KinoSearch::QueryParser::QueryParser->new(
 );
 use Plack::Request;
 use Plack::App::File;
+use Plack::Builder;
+use HTTP::Session::Store::File;
+use HTTP::Session::State::Cookie;
+
 
 # The "web framework"
 
@@ -33,9 +37,11 @@ sub app {
     my $self = shift;
     %args = ( # Defaults go first
         dsn => "dbi:SQLite:heritage.db",
+        sessiondir => "/tmp/eraeight",
         template_path => [ "user_templates", "templates"],
         @_
     );
+    if (!-d $args{sessiondir}) { mkdir $args{sessiondir} or die "Couldn't create session directory" }
     if (!$args{amazon_key_id}) { die "You need to include your Amazon key" };
     if (!$args{amazon_secret_key}) { die "You need to include your Amazon secret" };
     $ua_us = Net::Amazon->new(token => $args{amazon_key_id}, secret_key => $args{amazon_secret_key}); 
@@ -50,6 +56,10 @@ sub app {
         COMPILE_DIR => $args{compiled_templates},
         COMPILE_EXT => ".ttc"
     });
+    builder {
+      enable "Plack::Middleware::HTTPSession",
+           store => HTTP::Session::Store::File->new(dir => $args{sessiondir}),
+           state => HTTP::Session::State::Cookie->new(name => "eraeight");
     sub { 
         my $env = shift;
         my $req = Plack::Request->new($env);
@@ -67,6 +77,7 @@ sub app {
         $m->{template_engine} = $t;
         $m->handle_request($req)->finalize;
     }
+    };
 }
 
 sub new { bless {}, shift } # For templates
@@ -77,7 +88,8 @@ sub handle_request {
     my $page;
     my $res = Plack::Response->new;
     my (undef, $action, @args) = split /\//,  $req->path;
-    if (defined $action and $action eq "details") { return $self->details($req) }
+    my $sess = $req->env->{"psgix.session"};
+    if (defined $action and $action =~ /^(add_to_cart|view_cart|details|empty_cart)$/) { return $self->$action($req) }
     my $q = $req->parameters()->{q};
     if ($q) { 
         my ($pager, @books) = search($q, $req->parameters()->{page}, $req->parameters()->{epp});
@@ -97,6 +109,7 @@ sub respond {
         @args,
         req => $req, 
         args => \%args,
+        sess => $req->env->{"psgix.session"},
         e8 => EraEight->new(),
         }, \$out) ? $res->body($out) : $res->body($self->{template_engine}->error);
     return $res;
@@ -116,6 +129,31 @@ sub details {
     return $self->respond($req, "details", book => $book);
 }
 
+sub view_cart {
+    my ($self, $req) = @_;
+    my $sess = $req->env->{"psgix.session"};
+    my $books = $sess->get("books") || [];
+    my @books = map { EraEight::Books->search(book => $_) } @$books;
+    return $self->respond($req, "view_cart", books => \@books);
+}
+
+sub add_to_cart {
+    my ($self, $req) = @_;
+    my $sess = $req->env->{"psgix.session"};
+    my $books = $sess->get("books") || [];
+    my ($book) = EraEight::Books->search(book => $req->parameters()->{book});
+    $sess->set("books", [@$books, $book]);
+    my $res = Plack::Response->new();
+    $res->body("OK"); $res->status(200);
+    return $res;
+}
+
+sub empty_cart {
+    my ($self, $req) = @_;
+    my $sess = $req->env->{"psgix.session"};
+    $sess->set("books", undef);
+    return $self->respond($req, "searchbox");
+}
 # Utility methods
 
 sub timecheck {

@@ -2,8 +2,10 @@
     <head>
     <title> Era Eight </title>
     <link type="text/css" href="/static/jquery-ui.css" rel="stylesheet" />
+    <link type="text/css" href="/static/jquery.jgrowl.css" rel="stylesheet" />
     <script type="text/javascript" src="/static/jquery.min.js"></script>
     <script type="text/javascript" src="/static/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="/static/jquery.jgrowl_minimized.js"></script>
 <style>
 [% INCLUDE static/eraeight.css %]
 </style>
@@ -11,3 +13,11 @@
     </head>
 <body bgcolor=#ffffff text=#000000 link=#0000cc vlink=#551a8b alink=#ff0000>
 
+<div class="cart"> 
+[% SET cart = sess.get("books"); IF cart %]
+[% cart.size %] books in your cart<br> <a
+href="/view_cart">View cart</a> 
+[% ELSE %]
+Your cart is empty
+[% END %]
+</div>

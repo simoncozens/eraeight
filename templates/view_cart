@@ -1,0 +1,29 @@
+[% INCLUDE minisearch %]
+[% PROCESS macros %]
+
+<table class="carttable">
+<tr><th> Book title
+</th><th>Authors</th><th>Classmark</th><th>Locations</th></tr>
+[% FOR book = books %]
+
+<tr>
+<td>  <a href="/details?book=[%book.book%]">[% book.title %]</td>  
+<td>
+ [%FOR a = book.authors %]
+ [% a.firstname; " "; a.lastname; "," UNLESS a == book.authors.last %]
+ [% END %]
+</td>
+<td> [%FOR a = book.classmarks; a.classmark; " ";  END %] </td>
+<td>
+[% SET locs = []; FOR h = book.holdings; NEXT IF h.on_loan;
+locs.push(location(h)); END ; FOR l = locs.unique; %]
+[% l; "; " UNLESS l == locs.unique.last %]
+[% END %]
+</td>
+</tr>
+[% END %]
+
+</table>
+<center> <p>
+<a href="/empty_cart"> Empty cart </a></p>
+</center>
