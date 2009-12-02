@@ -1,23 +1,16 @@
-<h3> Holdings </h3>
 <ul>
+[% PROCESS macros %]
 [% FOR h = book.holdings %]
     <li> [% h.accession %] 
     [% SET l = h.on_loan; IF l; 
         IF l.overdue;
         '<span class="overdue">Overdue: On loan to '; l.to; "</span>"; 
         ELSE;
-            "On loan";
+            "On loan ";
         END;
         " (Due back "; l.due.ymd; ")";
     ELSE;
-    # Ideally we should get these from the locations table.
-    IF h.location == "M"; "Main library";
-    ELSIF h.location == "R"; "Reference Room";
-    ELSIF h.location == "RR"; "Resource Room";
-    ELSIF h.location == "S"; "Stack (see librarian)";
-    ELSIF h.location == "P"; "Periodicals collection";
-    ELSIF h.location == "V"; "Video library";
-    END;
+    location(h);
     END;
     %] 
 [% END %]

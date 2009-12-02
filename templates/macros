@@ -1,0 +1,9 @@
+[% MACRO location(h) BLOCK;
+    IF h.location == "M"; "Main library";
+    ELSIF h.location == "R"; "Reference Room";
+    ELSIF h.location == "RR"; "Resource Room";
+    ELSIF h.location == "S"; "Stack (see librarian)";
+    ELSIF h.location == "P"; "Periodicals collection";
+    ELSIF h.location == "V"; "Video library";
+    END;
+END %]
