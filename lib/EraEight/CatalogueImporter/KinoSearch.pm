@@ -15,7 +15,8 @@ sub new {
     );
     $self->{invindexer}->spec_field( name => "id", analyzed => 0, indexed => 0, stored => 1);
     $self->{invindexer}->spec_field( name => "year", analyzed => 0, stored => 0);
-    for (qw/author editor title publisher classmark/) {
+    $self->{invindexer}->spec_field( name => "classmark", analyzed => 0, stored => 0);
+    for (qw/author editor title publisher/) {
         $self->{invindexer}->spec_field(name => $_, stored => 0);
     }
 
