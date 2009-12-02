@@ -10,12 +10,12 @@
  [% END;%][% END%]
  </p>
  <table>
-    <tr><th>Classmark</th> <td> [% FOR c = book.classmarks %] [% c.classmark; END %]</td></tr>
     [% FOR col = ["year", "publisher", "dimensions", "edition", "notes",
     "address"] %]
         [% IF book.$col %]
         <tr><th align="left">[%col |ucfirst%]</th><td>[%book.$col%]</td></tr>[% END %]
     [% END %]
+    <tr><th>Classmark</th> <td> [% FOR c = book.classmarks %] [% c.classmark; END %]</td></tr>
 </table>
 
 
