@@ -82,7 +82,8 @@ sub handle_request {
     if ($q) { 
         my ($pager, @books) = search($q, $req->parameters()->{page}, $req->parameters()->{epp});
         if ($req->parameters()->{btnI}) { return $self->details($req, $books[0]) }
-        return $self->respond($req, "results", books => \@books, pager => $pager);
+        my $hints = $self->searchhints($q, \@books);
+        return $self->respond($req, "results", books => \@books, pager => $pager, hints => $hints);
     }
     return $self->respond($req, "searchbox");
 }
@@ -108,10 +109,9 @@ sub details {
     ($book) = EraEight::Books->search(book => $req->parameters()->{book})
         if !$book;
     if (!$book) { return $self->respond($req, "searchbox"); }
-    if ($book->book =~ /^[0-9X]{10}$/ and !$book->amazon and fork) {
+    if ($book->book =~ /^[0-9X]{10}$/ and !$book->amazon) {
         _try_amazon($book->book, $ua_us) ||
         _try_amazon($book->book, $ua_uk);
-        exit;
     }
     return $self->respond($req, "details", book => $book);
 }
@@ -152,4 +152,24 @@ sub _try_amazon {
     });
 }
 
+sub searchhints {
+    my ($self, $q, $books) = @_;
+    if ($q =~ /(?:\b|^)(1\d\d\d)/ and $q !~ /year:/i) { return "You can find books published in $1 by adding <b>year:$1</b> to your search" }
+    for (@$books) { 
+        if ($q !~ /author:/i) { 
+        for (map {$_->lastname} $_->authors) {
+            return "You can find books written by '$_' by adding <b>author:$_</b> to your search" if $q =~ /(\b|^)$_\b/i;
+        }
+        }
+    }
+    my @advice = ("Find books published by Lion by searching for <b>publisher:Lion</b>",
+    "EraEight knows about common plurals and suffixes, so looking up <b>Christianity</b>, <b>Christians</b> and <b>Christian</b> all give the same results",
+    "You can find books by title, author, year, publisher, editor and classmark. Just search for, e.g. <b>publisher:orbis author:koyama</b>",
+    "If Google Books has a preview of a book, then we'll provide a link to it",
+    "We try to find descriptions and pictures of books from Amazon where possible",
+    "You can use a minus sign to negate search terms. If you want books about salvation but not about the Salvation Army, say <b>salvation -army</b>",
+    "Normally all search terms have to be present for a book to show up but you can change that using brackets and upper-case <b>OR</b>. If you want books on Mahayana Buddhism, try <b>(chinese OR tibetan OR japanese) buddhism</b>."
+    );
+    if (rand() < 0.75) { return @advice[rand @advice] }
+}
 1;

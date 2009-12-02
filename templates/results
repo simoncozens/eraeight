@@ -1,4 +1,7 @@
 [% INCLUDE minisearch %]
+[% IF hints %]
+<center><i><b>Did you know?</b> <br> [%hints %]</i></center>
+[% END %]
 [% IF pager.total_entries > 0 %]
 <p>
     Results [%pager.first%] to [%pager.last%] of [%pager.total_entries%]
