@@ -20,9 +20,7 @@ sub load {
     EraEight::Books->has_many("holdings" => "EraEight::Accessions");
     EraEight::Books->has_many("classmarks" => "EraEight::Classmarks");
     EraEight::Booksout->has_a("accession" => "EraEight::Accessions");
-    EraEight::Booksout->set_sql(overdue => <<EOF);
-    SELECT * FROM booksout where day_due > strftime('%s','now')
-EOF
+    EraEight::Booksout->set_sql(overdue => "SELECT * FROM booksout where day_due < ?");
 }
 
 sub EraEight::Books::amazon { 
