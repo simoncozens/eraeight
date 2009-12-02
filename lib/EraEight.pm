@@ -170,6 +170,6 @@ sub searchhints {
     "You can use a minus sign to negate search terms. If you want books about salvation but not about the Salvation Army, say <b>salvation -army</b>",
     "Normally all search terms have to be present for a book to show up but you can change that using brackets and upper-case <b>OR</b>. If you want books on Mahayana Buddhism, try <b>(chinese OR tibetan OR japanese) buddhism</b>."
     );
-    if (rand() < 0.75) { return @advice[rand @advice] }
+    if (rand() < 0.75) { return $advice[rand @advice] }
 }
 1;
