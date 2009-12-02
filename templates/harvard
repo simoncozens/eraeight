@@ -1,5 +1,4 @@
- <div style="margin-left:20px;
- background: #efefff; margin:10px; padding: 5px; width: 80%; font-size: 9pt">
+  <p>
   [% SET cmax = book.authors.size; SET cmax = 3 IF cmax > 4;
   SET count = 0; FOR a = book.authors; SET count = count + 1; %]
  [% a.lastname; ", "; a.firstname.substr(0,1); "."; 
@@ -9,4 +8,4 @@
 %]
  [% END;%]
  ([%book.year%]) <i>[%book.title%]</i>, [%IF book.address; book.address;": ";END; book.publisher%]
- </div>
+ </p>

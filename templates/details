@@ -32,7 +32,10 @@
     </div>
 [% END %]
     <div id="tabs-3">
+ <div style="margin-left:20px;
+ background: #efefff; margin:10px; padding: 5px; width: 80%; font-size: 9pt">
 [% INCLUDE harvard %]
+</div>
 [% INCLUDE bibtex %]
 </div>
 <script type="text/javascript"> $(function() { $("#tabs").tabs(); }); </script>

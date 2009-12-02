@@ -1,6 +1,12 @@
 [% INCLUDE minisearch %]
 [% PROCESS macros %]
+[% IF req.parameters.bibliography %]
+<h2> Bibliography</h2>
 
+[% FOR book = books; INCLUDE harvard; END %]
+[% ELSE %]
+<center> <p> <a href="?bibliography=1">Download as a Bibliography</a>
+</p></center>
 <table class="carttable">
 <tr><th> Book title
 </th><th>Authors</th><th>Classmark</th><th>Locations</th></tr>
@@ -27,3 +33,4 @@ locs.push(location(h)); END ; FOR l = locs.unique; %]
 <center> <p>
 <a href="/empty_cart"> Empty cart </a></p>
 </center>
+[% END %]
