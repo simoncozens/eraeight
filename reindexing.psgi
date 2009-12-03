@@ -1,0 +1,1 @@
+sub { [ 500, ["Content-Type", "text/html"], ["<html><body><h2>EraEight is reindexing</h2><p> The catalogue needs to be updated every night to bring in fresh data about where the books are. This process takes approximately five minutes. If you see this message in the daytime, something has gone wrong.<p></body></html>"]]}

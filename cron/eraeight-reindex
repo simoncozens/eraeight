@@ -1,0 +1,13 @@
+#!/bin/sh
+
+ERAEIGHT_HOME=/home/eraeight
+DATABASE_HOME=$ERAEIGHT_HOME/database/Heri4/WinData 
+
+/etc/init.d/eraeight stop
+plackup -a $ERAEIGHT_HOME/reindexing.psgi --port 80 >/dev/null 2>/dev/null &
+test -d $DATABASE_HOME || (echo "Heritage database not mounted on $DATABASE_HOME - not updating eraeight db!"; exit)
+cd $ERAEIGHT_HOME/
+perl -I$ERAEIGHT_HOME/lib $ERAEIGHT_HOME/import.pl $DATABASE_HOME
+killall plackup
+/etc/init.d/eraeight start
+
