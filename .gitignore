@@ -1,0 +1,8 @@
+.gitignore
+Makefile
+e8-server.psgi
+heritage.db
+kinoindex/
+pm_to_blib
+user_templates/
+windata/
