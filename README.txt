@@ -1,5 +1,5 @@
-Welcome to Era Eight
---------------------
+Welcome to Era Eight 1.00
+-------------------------
 
 Era Eight is a free OPAC (Open Public Access Catalogue) add-on to the
 Heritage library management software. It is not based on the Heritage
@@ -41,19 +41,33 @@ form of Unix, you will already have Perl; on Windows, you will need to
 install Strawberry Perl. Get it from http://strawberryperl.com/ and
 double click to install.
 
-Era Eight also needs a number of other Perl modules installed, but 
-it makes this easy by downloading and installing them for you. To do
-this, open a console window, navigate to the Era Eight directory and
-run "perl Makefile.PL" - then follow the prompts. Type "make" and the
-installer will download and install the modules. 
+Era Eight also needs a number of other Perl modules installed, but it
+makes this easy by downloading and installing them for you. To do this,
+open a console window, navigate to the Era Eight directory and run "perl
+Makefile.PL" - then follow the prompts. Type "make" (or "dmake" on
+Windows) and the installer will download and install the modules. 
 
  Note: If you are on Debian or Ubuntu, you can make life easier for
  yourself by installing a few packages first:
     sudo apt-get install libtemplate-perl libclass-dbi-sqlite-perl libhttp-server-simple-perl
  
- Note: There are currently some problems making Era Eight work on
- Windows. This is due to the upstream modules that E8 uses, not to E8
- itself. I'm working with the modules' authors to get this fixed.
+Making it work on Windows
+-------------------------
+
+On Windows, there are still problems with one of the required Perl
+modules. The trick is to attempt to install as above, and then fix up
+the stragglers like so:
+
+* Net::Amazon
+
+To persuade Net::Amazon to install, you'll need to increase a parameter
+that dmake uses. The easiest way to do this is to edit the file
+\Strawberry\c\bin\startup\startup.mk - add the following line at the top
+of the file:
+
+    MAXLINELENGTH=50000
+
+Then install it again.
 
 Setting up the database
 -----------------------
@@ -71,15 +85,12 @@ database:
 where $directory is the directory containing the catalogue files. (i.e.
 ending with "/heri4/windata")
 
-You will also need to update the catalogue periodically - I suggest
-around once per hour. On Windows, you can configure a "scheduled task"
-from Start > Programs > Accessories > System Tools > Scheduled Tasks;
-on Unix, run "crontab -e" and add the following line
-
-    @hourly (cd $e8dir; perl import.pl $directory >/dev/null)
-
-where $e8dir is the directory containing Era Eight and $directory is the
-Heritage catalogue files as above.
+You will also need to update the catalogue periodically - I suggest once
+per day. On Windows, you can configure a "scheduled task" from Start >
+Programs > Accessories > System Tools > Scheduled Tasks; on Unix, see
+the suggested cron script in cron/eraeight-reindex. You can place this
+into cron.daily after editing the ERAEIGHT_HOME and DATABASE_HOME
+variables.
 
 Amazon Web Services key
 -----------------------
@@ -93,7 +104,7 @@ Configuring the server
 ----------------------
 
 Finally, you will need to configure your server. To do this, create a
-file in your Era Eight directory called "e8-server.pl". (Future versions
+file in your Era Eight directory called "e8-server.psgi". (Future versions
 will help you to do this, but we're not quite there yet.)
 
 In the simplest case, your file should look like this:
@@ -104,7 +115,7 @@ In the simplest case, your file should look like this:
         amazon_secret_key => "... Amazon secret here ...",
         library_name => "My Institution",
 
-This will start a search engine running on port 4848 of your server. To
+This will start a search engine running on port 5000 of your server. To
 change the port, add a line:
 
     port => 1234,
@@ -125,10 +136,13 @@ Running your server
 
 Now in the Era Eight directory, run:
 
-    perl e8-server.pl
+    plackup -a e8-server.psgi
 
-You should then be able to connect to port 4848 of your server in a web
-browser. (http://yourserver.yourinstitution.org:4848/)
+You should then be able to connect to port 5000 of your server in a web
+browser. (http://yourserver.yourinstitution.org:5000/)
+
+For Unix users, there's an init script in init.d to help you set up the
+server.
 
 Enjoy Era Eight!
 

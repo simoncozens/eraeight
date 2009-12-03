@@ -1,0 +1,13 @@
+What's new in this release of EraEight
+
+1.00 Released 2009-12-03
+
+* "Shopping cart" feature allowing you to create a list of books, and
+  download a bibliography/location table for them.
+* Searching by classmark works
+* Display search hints to help you search more efficiently
+* Fixed bug where some books would always have 3 holdings regardless of
+  reality
+* Works better on Unix hosts that mount Windows database shares
+* Better instructions on how to install on Windows
+* Moved to Plack, a lighter and faster web application framework
