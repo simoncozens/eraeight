@@ -11,7 +11,7 @@ sub load {
         relationships => 1,
     );
     foreach my $table ($loader->tables) {
-        $loader->find_class($table)->db_Main->func(20000, 'busy_timeout');
+        $loader->find_class($table)->db_Main->func(5, 'busy_timeout');
     }
     $_->has_a("book" => "EraEight::Books")
         for qw/EraEight::Authors EraEight::Classmarks EraEight::Accessions/;
