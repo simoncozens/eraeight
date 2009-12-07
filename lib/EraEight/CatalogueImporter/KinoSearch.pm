@@ -8,11 +8,7 @@ sub new {
     my ($class, $path) = @_;
     my $self = bless {}, $class;
     $self->{analyzer} = KinoSearch::Analysis::PolyAnalyzer->new( language => 'en' );
-    $self->{invindexer} = KinoSearch::InvIndexer->new(
-        invindex => $path,
-        create   => 1,
-        analyzer => $self->{analyzer},
-    );
+    $self->{path} = $path;
     $self->{invindexer}->spec_field( name => "id", analyzed => 0, indexed => 0, stored => 1);
     $self->{invindexer}->spec_field( name => "year", analyzed => 0, stored => 0);
     $self->{invindexer}->spec_field( name => "classmark", analyzed => 0, stored => 0);
@@ -30,6 +26,11 @@ sub DESTROY {
 
 sub index {
     my ($self, $book) = @_;
+    $self->{invindexer} ||= KinoSearch::InvIndexer->new(
+        invindex => $self->{path},
+        create   => 1,
+        analyzer => $self->{analyzer},
+    );
     my $doc = $self->{invindexer}->new_doc;
     
     for (qw/year publisher id title/) {
