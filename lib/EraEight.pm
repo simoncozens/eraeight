@@ -2,7 +2,7 @@ package EraEight;
 my $requests = 0;
 our %args;
 our $start;
-our $VERSION = "1.00";
+our $VERSION = "1.01";
 use Net::Amazon;
 use Plack::Response;
 our $ua_us; 

@@ -10,7 +10,7 @@ our %tables = (
     REV40001 => [accessionstatus => qw/status desc/],
     REV40013 => [loanhistory => qw/timestamp accession userid/],
     REV40031 => [booksout => qw/accession userid status timestamp day_issued day_due /],
-    REV40044 => [users => qw/userid title first last status/],
+    REV40044 => [users => qw/userid title first last address phone status/],
     REV40045 => [userstatus => qw/status desc /],
 );
 
@@ -40,8 +40,8 @@ sub import_simple_table {
     return unless file_has_changed($dbh, $file, $tablename);
     $dbh->{AutoCommit} = 0;
     eval { 
-        $dbh->do("CREATE TABLE IF NOT EXISTS $tablename (".join(",",@cols).");");
-        $dbh->do("DELETE FROM $tablename");
+        $dbh->do("DROP TABLE $tablename");
+        $dbh->do("CREATE TABLE $tablename (".join(",",@cols).");");
         my $sth = $dbh->prepare_cached("INSERT INTO $tablename VALUES (".
             join("," ,map { "?" } @cols).")");
         my $data = read_file(smashcase("$file.OV")).(-e smashcase("$file.LK") && read_file(smashcase("$file.LK")));

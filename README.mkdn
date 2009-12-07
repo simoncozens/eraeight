@@ -1,4 +1,4 @@
-Welcome to Era Eight 1.00
+Welcome to Era Eight 1.01
 -------------------------
 
 Era Eight is a free OPAC (Open Public Access Catalogue) add-on to the
