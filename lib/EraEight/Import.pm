@@ -73,8 +73,9 @@ $data||die "No data for $file!";
     if ($@) {
         warn "Transaction aborted because $@";
         eval { $dbh->rollback };
+    } else {
+        successful_import($dbh, $file, $tablename);
     }
-    successful_import($dbh, $file, $tablename);
 }
 
 sub _timestamp {
@@ -117,8 +118,9 @@ sub import_main_catalogue {
     if ($@) {
         warn "Transaction aborted because $@";
         eval { $dbc->{dbh}->rollback };
+    } else {
+        successful_import($dbc->{dbh}, "$datadir/REV40033", "catalogue");
     }
-    successful_import($dbc->{dbh}, "$datadir/REV40033", "catalogue");
 }
 
 sub _do_one_catalogue {
