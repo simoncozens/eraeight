@@ -40,6 +40,8 @@ sub import_simple_table {
     return unless file_has_changed($dbh, $file, $tablename);
     $dbh->{AutoCommit} = 0;
     eval { 
+        alarm 200;
+        local $SIG{ALRM} = sub { die "timed out\n" };
         $dbh->do("DROP TABLE IF EXISTS $tablename");
         $dbh->do("CREATE TABLE $tablename (".join(",",@cols).");");
         my $sth = $dbh->prepare_cached("INSERT INTO $tablename VALUES (".
@@ -69,6 +71,7 @@ $data||die "No data for $file!";
         }
         if ($EraEight::Import::progress) {print "\n"}
         $dbh->commit;
+        alarm 0;
     };
     if ($@) {
         warn "Transaction aborted because $@";
@@ -109,11 +112,14 @@ sub import_main_catalogue {
     $dbc->{dbh}->{RaiseError} = 1;
     return unless file_has_changed($dbc->{dbh}, "$datadir/REV40033", "catalogue");
     eval {
+        alarm 300;
+        local $SIG{ALRM} = sub { die "timed out\n" };
         $dbc->clearout();
         $dbc->prepare();
         _do_one_catalogue("$datadir/REV40033.LK", @callbacks);
         _do_one_catalogue("$datadir/REV40033.OV", @callbacks);
         $dbc->{dbh}->commit;
+        alarm 0;
     };
     if ($@) {
         warn "Transaction aborted because $@";
