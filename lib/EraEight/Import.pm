@@ -40,7 +40,7 @@ sub import_simple_table {
     return unless file_has_changed($dbh, $file, $tablename);
     $dbh->{AutoCommit} = 0;
     eval { 
-        $dbh->do("DROP TABLE $tablename");
+        $dbh->do("DROP TABLE IF EXISTS $tablename");
         $dbh->do("CREATE TABLE $tablename (".join(",",@cols).");");
         my $sth = $dbh->prepare_cached("INSERT INTO $tablename VALUES (".
             join("," ,map { "?" } @cols).")");
