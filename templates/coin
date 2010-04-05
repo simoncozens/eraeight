@@ -1,0 +1,2 @@
+<span class="Z3988" title="ctx_ver=Z39.88-2004&amp;rft_val_fmt=info%3Aofi%2Ffmt%
+3Akev%3Amtx%3Abook&amp;rft.btitle=[%book.title |url; FOR a = book.authors %]&amp;rft.au=[%a.lastname |url; ",+"; a.firstname|url; END%]&amp;rft.date=[%book.year%]&amp;rft.pub=[%book.publisher|url%]&amp;rft.place=[%book.address|url%]">
