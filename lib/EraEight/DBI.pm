@@ -3,15 +3,17 @@ use Class::DBI::Loader;
 use Time::Piece;
 
 sub load {
-    my ($self, $dsn) = @_;
+    my ($self, $dsn, $u, $p) = @_;
     my $loader = Class::DBI::Loader->new(
         dsn => $dsn,
+        user => $u,
+        password => $p,
         namespace => "EraEight",
         options => { AutoCommit => 1 },
         relationships => 1,
     );
     foreach my $table ($loader->tables) {
-        $loader->find_class($table)->db_Main->func(5, 'busy_timeout');
+        #$loader->find_class($table)->db_Main->func(5, 'busy_timeout');
     }
     $_->has_a("book" => "EraEight::Books")
         for qw/EraEight::Authors EraEight::Classmarks EraEight::Accessions/;

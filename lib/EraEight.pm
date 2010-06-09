@@ -48,7 +48,8 @@ sub app {
     $ua_uk = Net::Amazon->new(token => $args{amazon_key_id}, secret_key => $args{amazon_secret_key}, locale=>"uk");
 
     use EraEight::DBI;
-    EraEight::DBI->load($args{dsn});
+    EraEight::DBI->load($args{dsn}, $args{db_user}, $args{db_pass});
+
     my $t = Template->new({
         INCLUDE_PATH => $args{template_path},
         PRE_PROCESS  => "header",
