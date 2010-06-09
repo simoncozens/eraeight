@@ -1,28 +1,28 @@
 package EraEight::Import;
 use File::Basename;
 use strict;
-$EraEight::Import::progress = 0;
+$EraEight::Import::progress = 1;
 use File::Slurp;
 use DBI;
 
 our %tables = (
     REV40000 => [accessions => qw/accession book status loantype location category copies/],
-    REV40001 => [accessionstatus => qw/status desc/],
+    REV40001 => [accessionstatus => qw/status description/],
     REV40013 => [loanhistory => qw/timestamp accession userid/],
     REV40031 => [booksout => qw/accession userid status timestamp day_issued day_due /],
     REV40044 => [users => qw/userid title first last address phone status/],
-    REV40045 => [userstatus => qw/status desc /],
+    REV40045 => [userstatus => qw/status description /],
 );
 
 our %complex_tables = (
-    REV40065 => [subjects => qw/code desc bookcount classmarks books/],
+    REV40065 => [subjects => qw/code description bookcount classmarks books/],
     
 );
 
 use Time::Piece;
 use Time::Seconds;
 
-my $pick_epoch = Time::Piece->strptime("1967-12-31", "%F");
+my $pick_epoch = Time::Piece->new(-63244800);
 sub pick2unix { return ($pick_epoch + ONE_DAY*shift)->epoch }
 
 my %directory;
@@ -40,11 +40,13 @@ sub import_simple_table {
     return unless file_has_changed($dbh, $file, $tablename);
     $dbh->{AutoCommit} = 0;
     eval { 
-        alarm 200;
+        alarm 600;
         local $SIG{ALRM} = sub { die "timed out\n" };
-        $dbh->do("DROP TABLE IF EXISTS $tablename");
-        $dbh->do("CREATE TABLE $tablename (".join(",",@cols).");");
-        my $sth = $dbh->prepare_cached("INSERT INTO $tablename VALUES (".
+        #$dbh->do("DROP TABLE IF EXISTS $tablename");
+        $dbh->do("DELETE FROM $tablename");
+        #$dbh->do("CREATE TABLE $tablename (".join(",",map { "$_ varchar(1024)" } @cols).");");
+        my $sth = $dbh->prepare_cached("INSERT INTO $tablename (".
+            join(",", @cols).") VALUES (".
             join("," ,map { "?" } @cols).")");
         my $data = read_file(smashcase("$file.OV")).(-e smashcase("$file.LK") && read_file(smashcase("$file.LK")));
 $data||die "No data for $file!";
@@ -52,7 +54,7 @@ $data||die "No data for $file!";
         if ($EraEight::Import::progress) { print "Importing $file ($tablename)\n" }
         my $cc = 0;
         if ($EraEight::Import::progress) { $| = 1; }
-        for (@records) {
+        LOOP: for (@records) {
             s/\0+//g; next unless /\xfe/; s/^(.)(.)// or next;
             my $id = substr($_, 0, ord($2)-128, "");
             next unless $id;
@@ -65,9 +67,12 @@ $data||die "No data for $file!";
             s/\375/ and /g;
             my @rows = ($id, split /\xfe/, $_);
             for (0..$#cols) {
-                if ($cols[$_] =~ /day_/) { $rows[$_] = pick2unix($rows[$_]); }
+                if ($cols[$_] =~ /day_/) { 
+                    $rows[$_] = pick2unix($rows[$_]); 
+                    if ($rows[$_] < 100000000) { next LOOP }; # End of page :(
+                }
             }
-            $sth->execute(@rows[0..$#cols]);
+            eval { $sth->execute(@rows[0..$#cols]); };
         }
         if ($EraEight::Import::progress) {print "\n"}
         $dbh->commit;
@@ -89,8 +94,8 @@ sub _timestamp {
 
 sub file_has_changed {
     my ($dbh, $file, $tablename) = @_;
-    $dbh->do("CREATE TABLE IF NOT EXISTS importhistory (tablename, timestamp)");
-    my $import = $dbh->selectall_hashref("SELECT tablename, max(timestamp) lastimport FROM importhistory GROUP BY tablename", "tablename");
+    $dbh->do("CREATE TABLE IF NOT EXISTS importhistory (tablename varchar(255), times varchar(255))");
+    my $import = $dbh->selectall_hashref("SELECT tablename, max(times) lastimport FROM importhistory GROUP BY tablename", "tablename");
     if ($import->{$tablename} and $import->{$tablename}->{lastimport} >= _timestamp($file)) {
         print "$tablename is current, skipping\n" if $EraEight::Import::progress;
         return 0;
@@ -100,6 +105,7 @@ sub file_has_changed {
 
 sub successful_import {
     my ($dbh, $file, $tablename) = @_;
+    $dbh->do("DELETE FROM importhistory WHERE tablename = ? ", {}, $tablename);
     $dbh->do("INSERT INTO importhistory VALUES (?, ?)", {}, $tablename, _timestamp($file));
     $dbh->commit;
 }
@@ -110,9 +116,9 @@ sub import_main_catalogue {
     die "At least one callback needs to be DBI backed, and you need to have imported accessions already " unless $dbc;
     $dbc->{dbh}->{AutoCommit} = 0;
     $dbc->{dbh}->{RaiseError} = 1;
-    return unless file_has_changed($dbc->{dbh}, "$datadir/REV40033", "catalogue");
+    return 0 unless file_has_changed($dbc->{dbh}, "$datadir/REV40033", "catalogue");
     eval {
-        alarm 300;
+        alarm 600;
         local $SIG{ALRM} = sub { die "timed out\n" };
         $dbc->clearout();
         $dbc->prepare();
@@ -124,8 +130,10 @@ sub import_main_catalogue {
     if ($@) {
         warn "Transaction aborted because $@";
         eval { $dbc->{dbh}->rollback };
+        return 0;
     } else {
         successful_import($dbc->{dbh}, "$datadir/REV40033", "catalogue");
+        return 1;
     }
 }
 
