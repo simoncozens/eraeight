@@ -1,0 +1,34 @@
+[% IF pager.total_entries > 0 %]
+<p>
+    Results [%pager.first%] to [%pager.last%] of [%pager.total_entries%]
+    for "[%req.parameters.q |html%]"
+</p>
+<center>
+[% INCLUDE pager %]    
+</center>
+<script>
+
+function addcart(book) {
+    $.get("/add_to_cart", { "book": book }, function() {
+        $.jGrowl("Added to cart");
+    });
+}
+</script>
+<ul class="pageitem">
+[% FOR book = books %]
+<li class="textbox">
+ <a href="/details?book=[%book.book%]">[% book.title %]</a>  
+ [% IF book.authors %]by [%FOR a = book.authors %]
+ [% a.firstname; " "; a.lastname; "," UNLESS a == book.authors.last %]
+ [% END;%][% END%]
+[% SET h = book.holdings; SET in = 0; SET all = 0; FOR x = h; SET all = all+1; SET in = in + 1 UNLESS x.on_loan; END; %]
+     <small>([% in %] of [% all %])</small>
+</li>
+[% END %]
+</ul>
+[% ELSE %]
+<center>
+No results found. <a href="http://books.google.co.uk/books?q=[%req.parameters.q |uri%]">Try this search on Google Books</a>.
+</center>
+[% END %]
+[% INCLUDE minisearch %]

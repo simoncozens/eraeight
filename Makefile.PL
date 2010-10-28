@@ -21,6 +21,7 @@ requires	"Class::DBI::SQLite" => 0;
 requires	"DBD::SQLite" => 1.27;
 requires	"Template" => 0;
 requires	"Time::Piece" => 0;
+requires    "HTTP::BrowserDetect" => 0;
 recommends  "Time::HiRes" => 0;
 auto_install;
 WriteAll;

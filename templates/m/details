@@ -1,0 +1,26 @@
+<ul class="pageitem">
+<li class="textbox">
+[% IF book.amazon AND book.amazon.imageurlmedium %]
+<a href="[%book.amazon.imageurllarge%]"><img
+src="[%book.amazon.imageurlmedium%]"
+style="float:right;width:50px"/></a>[% END %]
+<b>[%book.title%]</b>
+ <p> [% IF book.authors %]by [%FOR a = book.authors %]
+ [% a.firstname; " "; a.lastname; "," UNLESS a == book.authors.last %]
+ [% END;%][% END%]
+ </p>
+ <table>
+    [% FOR col = ["year", "publisher", "dimensions", "edition", "notes",
+    "address"] %]
+        [% IF book.$col %]
+        <tr><th align="left">[%col |ucfirst%]</th><td>[%book.$col%]</td></tr>[% END %]
+    [% END %]
+    <tr><th align="left">Classmark</th> <td> [% FOR c = book.classmarks %] [% c.classmark; END %]</td></tr>
+</table>
+
+</li>
+   <li class="textbox">
+   [% INCLUDE holdings %]
+   </li>
+   </ul>
+[% INCLUDE minisearch %]

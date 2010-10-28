@@ -1,0 +1,17 @@
+[% MACRO link_page(num) BLOCK; %]
+      [% IF num == pager.current_page %]
+            [% num %]
+      [% ELSE %]
+      <a href="?page=[% num %]&q=[% req.parameters.q |uri%]">
+            [% num %]
+      </a>
+      [% END %]
+[% END %]
+[% IF pager.current_page > 1; %]
+<div id="leftnav"><a href="?page=[% pager.current_page - 1 %]&q=[%
+req.parameters.q |uri%]">Previous Page</a></div>
+[% END %]
+[% IF pager.current_page < pager.last_page; %]
+<div id="rightnav"><a href="?page=[% pager.current_page + 1 %]&q=[%
+req.parameters.q |uri%]">Next Page</a></div>
+[% END %]

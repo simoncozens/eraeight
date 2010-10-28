@@ -1,0 +1,10 @@
+<form name="f" action="/search">
+<ul class="pageitem">
+  <li class="bigfield"
+<input value="" placeholder="Search terms" title="Search" class="lst" size="55" name="q"
+maxlength="2048" autocomplete="off"></li>
+  <li class="button">
+      <input name="Submit" type="submit" value="Search [%args.library_name%] Library" />
+        </li>
+        </ul>
+</form>

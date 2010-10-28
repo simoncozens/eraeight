@@ -1,0 +1,17 @@
+<ul>
+[% PROCESS macros %]
+[% FOR h = book.holdings %]
+    <li> [% h.accession %] 
+    [% SET l = h.on_loan; IF l; 
+        IF l.overdue;
+        '<span class="overdue">Overdue: On loan to '; l.to; "</span>"; 
+        ELSE;
+            "On loan ";
+        END;
+        " (Due back "; l.due.ymd; ")";
+    ELSE;
+    location(h);
+    END;
+    %] 
+[% END %]
+</ul>

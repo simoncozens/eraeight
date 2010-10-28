@@ -4,6 +4,7 @@ our %args;
 our $start;
 our $VERSION = "1.01";
 use Net::Amazon;
+use HTTP::BrowserDetect;
 use Plack::Response;
 our $ua_us; 
 our $ua_uk; 
@@ -57,6 +58,15 @@ sub app {
         COMPILE_DIR => $args{compiled_templates},
         COMPILE_EXT => ".ttc"
     });
+    my $mobile_t = Template->new({
+        INCLUDE_PATH => [ 
+            (map { "$_/m/" } @{$args{template_path}}),
+            @{$args{template_path}}
+        ],
+        PRE_PROCESS  => "header",
+        POST_PROCESS => "footer",
+        COMPILE_DIR => $args{compiled_templates},
+    });
     builder {
       enable "Plack::Middleware::HTTPSession",
            store => HTTP::Session::Store::File->new(dir => $args{sessiondir}),
@@ -66,8 +76,11 @@ sub app {
         my $req = Plack::Request->new($env);
         # Fake static middleware because it won't let us have multiple
         # paths
+        my $is_mobile = HTTP::BrowserDetect->new($req->user_agent)->mobile();
         if ($req->path =~ /^\/static/) {
-            for (@{ref($args{template_path}) ? $args{template_path} : [$args{template_path}]}) {
+            my @paths = @{ref($args{template_path}) ? $args{template_path} : [$args{template_path}]};
+            unshift @paths, map { "$_/m/" } @paths if $is_mobile;
+            for (@paths) { 
                 next unless -f "$_/".$req->path;
                 my $file = Plack::App::File->new({ root => $_ });
                 return $file->call({ %$env, PATH_INFO => $env->{PATH_INFO} });
@@ -75,7 +88,7 @@ sub app {
             return [404, ['Content-Type' => 'text/plain'], ['not found']];
         }
         my $m = $self->new(%args);
-        $m->{template_engine} = $t;
+        $m->{template_engine} = $is_mobile ? $mobile_t : $t;
         $m->handle_request($req)->finalize;
     }
     };
