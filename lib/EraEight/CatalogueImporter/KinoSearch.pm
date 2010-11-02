@@ -22,7 +22,7 @@ sub setup_indexer {
     $self->{invindexer}->spec_field( name => "id", analyzed => 0, indexed => 0, stored => 1);
     $self->{invindexer}->spec_field( name => "year", analyzed => 0, stored => 0);
     $self->{invindexer}->spec_field( name => "classmark", analyzed => 0, stored => 0);
-    for (qw/author editor title publisher/) {
+    for (qw/author editor title publisher subject/) {
         $self->{invindexer}->spec_field(name => $_, stored => 0);
     }
 }
@@ -42,7 +42,8 @@ sub index {
     }
     $doc->set_value( author => join " ", map { join " ", $_->{first}, $_->{last} } @{$book->{authors}});
     $doc->set_value( editor => join " ", @{$book->{editors}});
-    $doc->set_value( classmark => join " ", @{$book->{editors}});
+    $doc->set_value( classmark => join " ", @{$book->{classmarks}});
+    $doc->set_value( subject => join " ", @{$book->{catcode2}});
     $doc->set_boost($book->{score});
     $self->{invindexer}->add_doc($doc);
 }
