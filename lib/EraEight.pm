@@ -148,7 +148,7 @@ sub view_cart {
     my $sess = $req->env->{"psgix.session"};
     my $books = $sess->get("books") || [];
     my @books = 
-        sort { ($a->authors)[0]->lastname cmp ($b->authors)[0]->lastname }
+        sort { eval { ($a->authors)[0]->lastname } cmp eval { ($b->authors)[0]->lastname } }
         map { EraEight::Books->search(book => $_) } @$books;
     return $self->respond($req, "view_cart", books => \@books);
 }
