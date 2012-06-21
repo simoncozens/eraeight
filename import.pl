@@ -1,5 +1,7 @@
 #!/usr/bin/perl
-use lib 'lib';
+use FindBin qw($Bin);
+use lib "$Bin/lib";
+do "$Bin/e8-server.psgi";
 use DBI;
 my $dir = shift;
 if (!-d $dir) {
@@ -9,7 +11,7 @@ The heritage catalogue directory usually looks like
    something/heri4/windata
 ";
 }
-my $dbh = DBI->connect("dbi:SQLite:heritage.db");
+my $dbh = DBI->connect($EraEight::args{dsn});
 use EraEight::Import;
 use File::Basename;
 EraEight::Import->import_simple_table($dbh, $_) for 
@@ -19,6 +21,6 @@ EraEight::Import->import_simple_table($dbh, $_) for
 
 use EraEight::CatalogueImporter::DBI;
 use EraEight::CatalogueImporter::KinoSearch;
-my $cb = EraEight::CatalogueImporter::DBI->new("dbi:SQLite:heritage.db");
+my $cb = EraEight::CatalogueImporter::DBI->new($EraEight::args{dsn});
 my $cb2 = EraEight::CatalogueImporter::KinoSearch->new("kinoindex");
 EraEight::Import->import_main_catalogue($dir, $cb, $cb2);
