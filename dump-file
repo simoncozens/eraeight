@@ -2,12 +2,19 @@
 use File::Slurp;
 use DBI;
 my $data = read_file(shift);
+while ($data =~ s/([\0-\030]{10,})//) {
+    print "Stripping page $1\n";
+}
 my @records = split /(?=.[\200-\220])/ms, $data;
 for (@records) {
-    s/\0+//g; next unless /\xfe/; s/^(.)(.)// or next;
+    s/\0+//g; next unless /\xfe/; 
+    s/^(.)(.)//; 
+    next unless $2 eq chr 0x86;
+#    next if $1 eq chr 0xbc;
+    print "($1,$2) ";
     my $id = substr($_, 0, ord($2)-128, "");
     next unless $id;
     s/\375/ and /g;
     my @rows = ($id, split /\xfe/, $_);
-    print join"\t", @rows,"\n";
+    print join", ", @rows,"\n";
 }
