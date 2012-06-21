@@ -45,8 +45,8 @@ sub app {
     if (!-d $args{sessiondir}) { mkdir $args{sessiondir} or die "Couldn't create session directory" }
     if (!$args{amazon_key_id}) { die "You need to include your Amazon key" };
     if (!$args{amazon_secret_key}) { die "You need to include your Amazon secret" };
-    $ua_us = Net::Amazon->new(token => $args{amazon_key_id}, secret_key => $args{amazon_secret_key}); 
-    $ua_uk = Net::Amazon->new(token => $args{amazon_key_id}, secret_key => $args{amazon_secret_key}, locale=>"uk");
+    $ua_us = Net::Amazon->new(token => $args{amazon_key_id}, secret_key => $args{amazon_secret_key}, associate_tag => $args{amazon_tag}); 
+    $ua_uk = Net::Amazon->new(token => $args{amazon_key_id}, secret_key => $args{amazon_secret_key}, locale=>"uk",associate_tag => $args{amazon_tag});
 
     use EraEight::DBI;
     EraEight::DBI->load($args{dsn}, $args{db_user}, $args{db_pass});
@@ -148,7 +148,7 @@ sub view_cart {
     my $sess = $req->env->{"psgix.session"};
     my $books = $sess->get("books") || [];
     my @books = 
-        sort { eval { ($a->authors)[0]->lastname } cmp eval { ($b->authors)[0]->lastname } }
+        sort { eval { ($a->authors)[0]->lastname } cmp eval {($b->authors)[0]->lastname } }
         map { EraEight::Books->search(book => $_) } @$books;
     return $self->respond($req, "view_cart", books => \@books);
 }
@@ -217,6 +217,7 @@ sub searchhints {
         }
     }
     my @advice = ("Find books published by Lion by searching for <b>publisher:Lion</b>",
+    "You can search for a book by subject; <b>subject:japan</b> finds books about Japan, but which may not mention Japan in the title",
     "EraEight knows about common plurals and suffixes, so looking up <b>Christianity</b>, <b>Christians</b> and <b>Christian</b> all give the same results",
     "You can find books by title, author, year, publisher, editor and classmark. Just search for, e.g. <b>publisher:orbis author:koyama</b>",
     "If Google Books has a preview of a book, then we'll provide a link to it",

@@ -42,9 +42,9 @@ sub import_simple_table {
     eval { 
         alarm 600;
         local $SIG{ALRM} = sub { die "timed out\n" };
-        #$dbh->do("DROP TABLE IF EXISTS $tablename");
-        $dbh->do("DELETE FROM $tablename");
-        #$dbh->do("CREATE TABLE $tablename (".join(",",map { "$_ varchar(1024)" } @cols).");");
+        $dbh->do("DROP TABLE IF EXISTS $tablename");
+        #$dbh->do("DELETE FROM $tablename");
+        $dbh->do("CREATE TABLE $tablename (".join(",",map { "$_ varchar(1024)" } @cols).");");
         my $sth = $dbh->prepare_cached("INSERT INTO $tablename (".
             join(",", @cols).") VALUES (".
             join("," ,map { "?" } @cols).")");

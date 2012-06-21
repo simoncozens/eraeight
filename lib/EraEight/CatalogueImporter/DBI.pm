@@ -12,7 +12,7 @@ sub new {
 sub prepare {
     my $self = shift; my $dbh = $self->{dbh};
     $dbh->do("CREATE TABLE IF NOT EXISTS amazon (book varchar(1024), imageurlmedium varchar(1024), imageurllarge varchar(1024), productdescription text)");
-    $dbh->do("CREATE TABLE IF NOT EXISTS authors (id integer primary key not null auto_increment, book varchar(1024), firstname varchar(1024), lastname varchar(1024));");
+    $dbh->do("CREATE TABLE IF NOT EXISTS authors (id integer primary key not null, book varchar(1024), firstname varchar(1024), lastname varchar(1024));");
     $dbh->do("CREATE TABLE IF NOT EXISTS editors (book varchar(1024), name varchar(1024));");
     $dbh->do("CREATE TABLE IF NOT EXISTS classmarks (book varchar(1024), classmark varchar(1024));");
     $dbh->do("CREATE TABLE IF NOT EXISTS catcode$_ (book varchar(1024), category varchar(1024));") for 1..3;
@@ -31,7 +31,7 @@ sub prepare {
 
 sub clearout {
     my $dbc = shift;
-    $dbc->{dbh}->do("DELETE FROM $_")
+    $dbc->{dbh}->do("DROP TABLE IF EXISTS $_")
         for qw/books authors editors classmarks catcode1 catcode2 catcode3/;
 }
 
@@ -39,6 +39,7 @@ sub index {
     my ($self, $book) = @_;
     $self->{auth}->execute($book->{id}, $_->{"first"}, $_->{"last"}) 
         for @{ $book->{"authors"} };
+    return unless $book->{id};
     eval { $self->{book}->execute(@{$book}{qw/id title media edition address publisher year dimensions series notes/}); };
 
     # Loop unrolled for speed/memory
